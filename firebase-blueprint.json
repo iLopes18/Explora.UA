@@ -1,0 +1,114 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Student profile at UA",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "course": { "type": "string" },
+        "licenciaturas": { "type": "array", "items": { 
+          "type": "object", 
+          "properties": {
+            "name": { "type": "string" },
+            "institution": { "type": "string" }
+          }
+        }},
+        "mestrados": { "type": "array", "items": { 
+          "type": "object", 
+          "properties": {
+            "name": { "type": "string" },
+            "institution": { "type": "string" }
+          }
+        }},
+        "doutoramentos": { "type": "array", "items": { 
+          "type": "object", 
+          "properties": {
+            "name": { "type": "string" },
+            "institution": { "type": "string" }
+          }
+        }},
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "affiliations": { "type": "array", "items": { "type": "string" } },
+        "contacts": { "type": "object", "properties": {
+          "github": { "type": "string" },
+          "instagram": { "type": "string" },
+          "linkedin": { "type": "string" },
+          "email": { "type": "string" },
+          "others": { "type": "string" }
+        }},
+        "bio": { "type": "string" },
+        "isAlumni": { "type": "boolean" },
+        "lastUsernameChange": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "email", "username"]
+    },
+    "Connection": {
+      "title": "Connection",
+      "description": "A link between two users",
+      "type": "object",
+      "properties": {
+        "userA": { "type": "string" },
+        "userB": { "type": "string" },
+        "requesterId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "type": { "type": "string", "enum": ["friend", "collaborator"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userA", "userB", "requesterId", "status"]
+    },
+    "Nucleus": {
+      "title": "Nucleus",
+      "description": "University organization or core",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["NAPE", "AAUAv", "Course", "Department"] },
+        "description": { "type": "string" },
+        "members": { "type": "array", "items": { "type": "string" } },
+        "logoUrl": { "type": "string" }
+      },
+      "required": ["id", "name", "type"]
+    },
+    "Project": {
+      "title": "Project Call",
+      "description": "A bounty or project looking for talent",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "creatorId": { "type": "string" },
+        "requiredSkills": { "type": "array", "items": { "type": "string" } },
+        "nucleusId": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed", "draft"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "description", "creatorId"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Individual student profiles"
+    },
+    "connections/{connectionId}": {
+      "schema": "Connection",
+      "description": "Network connections between students"
+    },
+    "nuclei/{nucleusId}": {
+      "schema": "Nucleus",
+      "description": "UA Organizations and Nuclei"
+    },
+    "projects/{projectId}": {
+      "schema": "Project",
+      "description": "Project bounties and calls"
+    }
+  }
+}
