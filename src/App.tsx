@@ -10,7 +10,7 @@ import ProjectMural from './components/ProjectMural';
 import NucleusProfile from './components/NucleusProfile';
 import ConnectionManager from './components/ConnectionManager';
 
-import { ECOSYSTEMS } from './constants';
+import { ECOSYSTEMS, getDepartamentoDoCurso } from './constants';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -43,6 +43,7 @@ export default function App() {
         const userDoc = await getDoc(userDocRef);
         
         if (!userDoc.exists()) {
+          const defaultCourse = 'Universidade de Aveiro';
           const newUserProfile = {
             uid: user.uid,
             name: user.displayName || 'Estudante UA',
@@ -50,7 +51,8 @@ export default function App() {
             email: user.email,
             avatarUrl: user.photoURL,
             createdAt: serverTimestamp(),
-            course: 'Universidade de Aveiro',
+            course: defaultCourse,
+            department: getDepartamentoDoCurso(defaultCourse),
             bio: 'Novo membro do grafo de talento da UA.',
             skills: [],
             affiliations: [],

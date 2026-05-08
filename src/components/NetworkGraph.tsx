@@ -5,6 +5,7 @@ interface Node extends d3.SimulationNodeDatum {
   id: string;
   name: string;
   course: string;
+  department: string;
   avatarUrl?: string;
 }
 
@@ -51,6 +52,7 @@ export default function NetworkGraph({ users, connections, onNodeClick }: Networ
       id: u.uid || u.id,
       name: u.name,
       course: u.course,
+      department: u.department || 'UA',
       avatarUrl: u.avatarUrl
     }));
 
@@ -100,7 +102,7 @@ export default function NetworkGraph({ users, connections, onNodeClick }: Networ
 
     // Course Labels
     node.append('text')
-      .text(d => d.course.substring(0, 4).toUpperCase())
+      .text(d => d.department.toUpperCase())
       .attr('text-anchor', 'middle')
       .attr('dy', 40)
       .attr('font-family', 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace')
