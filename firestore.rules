@@ -48,7 +48,7 @@ service cloud.firestore {
       allow list: if isSignedIn();
       allow create: if isSignedIn() && isOwner(userId) && isValidUser(incoming()) && isValidId(userId);
       allow update: if isSignedIn() && isOwner(userId) && isValidUser(incoming())
-        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'username', 'course', 'licenciaturas', 'mestrados', 'doutoramentos', 'skills', 'affiliations', 'contacts', 'bio', 'updatedAt', 'lastUsernameChange', 'isAlumni'])
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'username', 'course', 'department', 'licenciaturas', 'mestrados', 'doutoramentos', 'skills', 'affiliations', 'contacts', 'bio', 'updatedAt', 'lastUsernameChange', 'isAlumni'])
         && (
           (incoming().username == existing().username) || 
           (
