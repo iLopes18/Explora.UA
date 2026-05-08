@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { db, auth } from '../lib/firebase';
-import { collection, query, onSnapshot, addDoc, where } from 'firebase/firestore';
+import { collection, query, onSnapshot, addDoc, where, serverTimestamp, orderBy } from 'firebase/firestore';
 import { Plus, Clock, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -10,7 +10,11 @@ export default function ProjectMural() {
   const [newProject, setNewProject] = useState({ title: '', description: '', skills: '' });
 
   useEffect(() => {
-    const q = query(collection(db, 'projects'), where('status', '==', 'open'));
+    const q = query(
+      collection(db, 'projects'), 
+      where('status', '==', 'open'),
+      orderBy('createdAt', 'desc')
+    );
     const unsub = onSnapshot(q, (snap) => {
       const dbProjects = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setProjects(dbProjects);
@@ -29,7 +33,7 @@ export default function ProjectMural() {
         requiredSkills: newProject.skills.split(',').map(s => s.trim()),
         creatorId: auth.currentUser.uid,
         status: 'open',
-        createdAt: new Date().toISOString()
+        createdAt: serverTimestamp()
       });
       setShowAddForm(false);
       setNewProject({ title: '', description: '', skills: '' });
