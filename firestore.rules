@@ -1,90 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 0. Default Deny
-    match /{document=**} {
-      allow read, write: if false;
-    }
 
-    // --- Helpers ---
-    function isSignedIn() { return request.auth != null; }
-    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
-    function incoming() { return request.resource.data; }
-    function existing() { return resource.data; }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
-    
-    // --- Validation Blueprints ---
-    function isValidUser(data) {
-      return data.keys().hasAll(['uid', 'name', 'email', 'username']) 
-        && data.uid is string && (data.uid == request.auth.uid || data.uid.size() > 0)
-        && data.name is string && data.name.size() <= 100
-        && data.username is string && data.username.size() >= 3 && data.username.size() <= 30 && data.username.matches('^[a-z0-9_]+$')
-        && data.email is string && data.email.size() <= 100
-        && (data.get('skills', []) is list && data.get('skills', []).size() <= 50)
-        && (data.get('affiliations', []) is list && data.get('affiliations', []).size() <= 30);
-    }
-
-    function isValidConnection(data) {
-      return data.keys().hasAll(['userA', 'userB', 'requesterId', 'status', 'type', 'createdAt'])
-        && data.userA is string && data.userB is string
-        && data.requesterId is string
-        && data.status in ['pending', 'accepted', 'declined']
-        && (data.userA == request.auth.uid || data.userB == request.auth.uid)
-        && data.type in ['friend', 'collaborator'];
-    }
-
-    function isValidProject(data) {
-      return data.keys().hasAll(['id', 'title', 'description', 'creatorId', 'status', 'createdAt'])
-        && data.id is string
-        && data.title is string && data.title.size() <= 200
-        && data.creatorId == request.auth.uid
-        && data.status in ['open', 'closed', 'draft'];
-    }
-
-    // --- Collection Routes ---
-    
+    // Users collection
     match /users/{userId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create: if isSignedIn() && isOwner(userId) && isValidUser(incoming()) && isValidId(userId);
-      allow update: if isSignedIn() && isOwner(userId) && isValidUser(incoming())
-        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'username', 'course', 'department', 'licenciaturas', 'mestrados', 'doutoramentos', 'skills', 'affiliations', 'contacts', 'bio', 'updatedAt', 'lastUsernameChange', 'isAlumni'])
-        && (
-          (incoming().username == existing().username) || 
-          (
-            (existing().get('lastUsernameChange', null) == null || 
-             request.time > existing().lastUsernameChange + duration.value(30, 'd')) &&
-            incoming().lastUsernameChange == request.time
-          )
-        );
+      allow read: if request.auth != null;           // any logged-in user can read profiles
+      allow write: if request.auth != null && request.auth.uid == userId; // only own doc
     }
 
+    // Connections collection
     match /connections/{connectionId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidConnection(incoming()) && incoming().requesterId == request.auth.uid && incoming().status == 'pending';
-      allow update: if isSignedIn() && isValidConnection(incoming())
-        && (existing().userA == request.auth.uid || existing().userB == request.auth.uid)
-        && incoming().requesterId == existing().requesterId
-        && (
-          // Recipients can accept/decline
-          (request.auth.uid != existing().requesterId && incoming().status != existing().status) ||
-          // Admin override or other updates (keeping it simple for now)
-          false
-        );
-      allow delete: if isSignedIn() && (existing().userA == request.auth.uid || existing().userB == request.auth.uid);
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null 
+        && (resource.data.senderId == request.auth.uid 
+            || resource.data.receiverId == request.auth.uid);
     }
 
-    match /nuclei/{nucleusId} {
-      allow read: if isSignedIn();
-      // Only system/admins should write nuclei for now
-      allow write: if false;
-    }
-
-    match /projects/{projectId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidProject(incoming());
-      allow update: if isSignedIn() && existing().creatorId == request.auth.uid && isValidProject(incoming());
-      allow delete: if isSignedIn() && existing().creatorId == request.auth.uid;
-    }
   }
 }

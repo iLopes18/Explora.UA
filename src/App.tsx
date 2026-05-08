@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { auth, db } from './lib/firebase';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
-import { collection, onSnapshot, doc, getDoc, setDoc, getDocFromServer } from 'firebase/firestore';
+import { collection, onSnapshot, doc, getDoc, setDoc, getDocFromServer, serverTimestamp } from 'firebase/firestore';
 import { Search, Users, Briefcase, Building2, LogIn, LogOut, User as UserIcon, Plus, ChevronDown, ChevronRight, Hash } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import NetworkGraph from './components/NetworkGraph';
@@ -49,7 +49,7 @@ export default function App() {
             username: user.email?.split('@')[0].replace(/[^a-z0-9_]/g, '') || 'no_' + user.uid.substring(0, 5),
             email: user.email,
             avatarUrl: user.photoURL,
-            createdAt: new Date().toISOString(),
+            createdAt: serverTimestamp(),
             course: 'Universidade de Aveiro',
             bio: 'Novo membro do grafo de talento da UA.',
             skills: [],

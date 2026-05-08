@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
-import { doc, getDoc, updateDoc, collection, addDoc, getDocFromServer } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, collection, addDoc, getDocFromServer, serverTimestamp } from 'firebase/firestore';
 import { X, ExternalLink, Github, Instagram, Linkedin, Mail, Tag, Award, Briefcase, Plus, Save, Trash2, ChevronDown, Globe, UserPlus } from 'lucide-react';
 import { 
   LICENCIATURAS, 
@@ -101,19 +101,32 @@ export default function ProfileCard({ userId, onClose, isSelf, currentUser, allC
       const docRef = doc(db, 'users', userId);
       
       const updateData: any = { 
-        ...editedProfile,
+        name: editedProfile.name,
+        username: editedProfile.username,
         course: mainCourse,
         department: getDepartamentoDoCurso(mainCourse),
-        updatedAt: new Date().toISOString() 
+        licenciaturas: editedProfile.licenciaturas || [],
+        mestrados: editedProfile.mestrados || [],
+        doutoramentos: editedProfile.doutoramentos || [],
+        skills: editedProfile.skills || [],
+        affiliations: editedProfile.affiliations || [],
+        contacts: editedProfile.contacts || {},
+        bio: editedProfile.bio || '',
+        isAlumni: editedProfile.isAlumni || false,
+        updatedAt: serverTimestamp() 
       };
 
       // Check if username changed
       if (editedProfile.username !== profile.username) {
-        updateData.lastUsernameChange = new Date().toISOString();
+        updateData.lastUsernameChange = serverTimestamp();
       }
 
       await updateDoc(docRef, updateData);
-      setProfile({...editedProfile, course: mainCourse, lastUsernameChange: updateData.lastUsernameChange || profile.lastUsernameChange});
+      setProfile({
+        ...profile,
+        ...updateData,
+        lastUsernameChange: updateData.lastUsernameChange || profile.lastUsernameChange
+      });
       setEditing(false);
     } catch (e: any) {
       if (e.code === 'permission-denied') {
