@@ -77,13 +77,6 @@ export default function NucleusProfile({ nucleus, users, onClose, onUserClick }:
                   className="flex items-center justify-between border border-[#141414]/10 p-3 hover:bg-[#141414] hover:text-[#E4E3E0] cursor-pointer transition-all group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full border border-current flex items-center justify-center overflow-hidden bg-white/20">
-                      {member.avatarUrl ? (
-                         <img src={member.avatarUrl} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <UserIcon className="w-4 h-4 opacity-40" />
-                      )}
-                    </div>
                     <div>
                       <h5 className="text-[11px] font-bold uppercase leading-tight">{member.name}</h5>
                       <p className="text-[9px] opacity-60">{member.course}</p>
